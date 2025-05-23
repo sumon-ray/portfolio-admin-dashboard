@@ -1,0 +1,26 @@
+.navButton {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  font-size:17px;
+  color: white;
+  padding: 12px 12px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-decoration: none;
+  background: transparent;
+  cursor: pointer;
+  transition: ease-out 0.5s;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 0 #1E3A8A;
+}
+
+.navButton:hover {
+  color: white;
+  box-shadow: inset 0 -100px 0 0 #1E3A8A;
+
+}
+
+.navButton:active {
+  transform: scale(0.95);
+}
