@@ -23,8 +23,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           - `py-8 px-4`: কন্টেন্টের চারপাশে কিছু প্যাডিং যোগ করে।
         */}
         <main className="flex-1   py-8 px-4">
-          <SidebarTrigger /> {/* এটি সাইডবার টগল করার বাটন হতে পারে */}
-          {children} {/* আপনার পেজ কন্টেন্ট, যেমন `Projectpage` এখানে রেন্ডার হবে */}
+          <SidebarTrigger /> 
+          {children} 
         </main>
       </div>
     </SidebarProvider>
