@@ -1,32 +1,37 @@
-// import { AppSidebar } from "@/components/sidebar/app-sidebar"
-import { AppSidebar } from "@/components/sidebar/app-sidebar"
+import type React from "react"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import '../globals.css';
-// FILE: app/dashboard/layout.tsx
-// ... (আপনার AppSidebar, SidebarProvider, SidebarTrigger import গুলো) ...
+import { AppSidebar } from "@/components/sidebar/app-sidebar" // Your AppSidebar component
+import "../globals.css" // Ensure global styles are imported
+import { cookies } from "next/headers" // For persisting sidebar state
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = cookies()
+  // Get the default open state for the sidebar from cookies for persistence
+  const defaultOpen = cookieStore.get("sidebar:state")?.value === "true"
+
   return (
-    <SidebarProvider>
-      {/* এই div টি পুরো ড্যাশবোর্ড লেআউটকে নিয়ন্ত্রণ করে।
-        - `flex`: এর চাইল্ডগুলোকে পাশাপাশি রাখে (Sidebar এবং main).
-        - `min-h-screen`: পুরো লেআউটটিকে অন্তত পুরো স্ক্রিন উচ্চতা দেয়।
-      */}
+    <SidebarProvider defaultOpen={defaultOpen}>
+      {/* This flex container holds the sidebar and the main content area side-by-side */}
       <div className="flex min-h-screen">
-        <AppSidebar /> {/* এটি আপনার সাইডবার, এর নিজস্ব `fixed` পজিশনিং এবং `width` থাকবে। */}
-
-        {/* মূল কন্টেন্ট এরিয়া:
-          - `flex-1`: সাইডবারের পর বাকি সব অনুভূমিক স্থান নেয়।
-          - `ml-[260px]`: সাইডবারের প্রস্থ অনুযায়ী একটি বাম মার্জিন তৈরি করে যাতে কন্টেন্ট সাইডবারের নিচে চলে না যায়।
-            (আপনার সাইডবারের প্রকৃত প্রস্থ অনুযায়ী `260px` পরিবর্তন করুন)।
-          - `overflow-y-auto`: যদি কন্টেন্ট বেশি হয়, তাহলে উল্লম্বভাবে স্ক্রল করার সুযোগ দেয়।
-          - `py-8 px-4`: কন্টেন্টের চারপাশে কিছু প্যাডিং যোগ করে।
+        <AppSidebar /> {/* Your sidebar component, which handles its own fixed positioning and width */}
+        {/* The main content area:
+            - `flex-1`: This is crucial. It tells this div to take up all remaining horizontal space
+                        after the sidebar. The shadcn/ui Sidebar component itself will push this
+                        content over, so no explicit `ml-[...]` is needed here.
+            - `flex flex-col`: Makes this a flex container for its children (header and page content),
+                               stacking them vertically.
+            - `bg-gray-50`: Sets the background color for the main content area.
+            - `overflow-auto`: Allows vertical scrolling if the content within this area exceeds its height.
         */}
-        <main className="flex-1   py-8 px-4">
-          <SidebarTrigger /> 
-          {children} 
+        <main className="flex-1 flex flex-col bg-gray-50 overflow-auto">
+          {/* A header for the main content area, including the sidebar toggle button */}
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-white shadow-sm">
+            <SidebarTrigger className="-ml-1" /> {/* This button toggles the sidebar */}
+            <h1 className="text-lg font-semibold">Dashboard</h1> {/* Example title */}
+          </header>
+          {children} {/* This is where your page.tsx content (e.g., Projectpage) will be rendered */}
         </main>
       </div>
     </SidebarProvider>
-  );
+  )
 }
