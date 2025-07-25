@@ -1,12 +1,13 @@
 'use client';
 
-import { getAllProjects } from '@/services/projectService';
+import { deleteProject, getAllProjects } from '@/services/projectService';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
+import Swal from 'sweetalert2';
 
 const SafeImage = ({
   src,
@@ -48,9 +49,9 @@ const SafeImage = ({
         onError={() => {
           console.warn(`Image failed to load: ${src}`);
           setError(true);
-          setLoaded(true); // Stop showing skeleton
+          setLoaded(true); 
         }}
-        unoptimized // remove if you have proper domains setup in next.config.js
+        unoptimized 
       />
     </div>
   );
@@ -74,10 +75,30 @@ const GetAllProjects = () => {
     router.push(`/dashboard/project/${id}`);
   };
 
-  const handleDelete = (id: string) => {
-    console.log('Delete project:', id);
-    // Implement deletion logic
-  };
+// delete project
+const handleDelete = async (id: string) => {
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "This action cannot be undone!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!',
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    await deleteProject(id);
+    setProjects(prev => prev.filter(project => project._id !== id));
+
+    Swal.fire('Deleted!', 'The project has been deleted.', 'success');
+  } catch (error) {
+    console.error('Failed to delete project:', error);
+    Swal.fire('Error', 'Could not delete the project. Please try again.', 'error');
+  }
+};
 
   return (
     <div className="p-6 space-y-4">

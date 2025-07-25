@@ -101,3 +101,33 @@ export const updateProject = async (
   ]);
   return data;
 };
+
+
+
+export const deleteProject = async (id: string) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/project/${id}`, {
+      method: "DELETE",
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Failed to delete project");
+    }
+
+    const result = await res.json();
+
+    // Revalidate paths after deletion
+    await revalidatePublicFrontendPaths([
+      "/dashboard/project/all-projects",
+      "/dashboard/project",
+      "/",
+    ]);
+
+    return result;
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    throw error;
+  }
+};
