@@ -1,12 +1,11 @@
-import ProjectForm from "@/components/project/projectForm"
+import React from 'react';
 
-const Projectpage = () => {
+const page = () => {
   return (
-
-    <div className="flex items-center  justify-center p-4 w-full">
-      <ProjectForm />
+    <div>
+      
     </div>
-  )
-}
+  );
+};
 
-export default Projectpage
+export default page;

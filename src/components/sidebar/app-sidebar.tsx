@@ -3,19 +3,14 @@
 import * as React from "react"
 import {
   AudioWaveform,
-  BookOpen,
   Bot,
-  Command,
-  Contact2,
-  Frame,
-  GalleryVerticalEnd,
+
+  Library,
   Map,
   PieChart,
   Settings2,
-  SquareTerminal,
-  SquareTerminalIcon,
-} from "lucide-react"
 
+} from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -33,8 +28,8 @@ import Link from "next/link"
 // This is sample data.
 const data = {
   user: {
-    name: "Admin",
-    email: "admin@gmail.com",
+    name: "Sumon Ray",
+    email: "sumonray146371@gmail.com",
     avatar: "/avatars/shadcn.jpg",
   },
 
@@ -45,10 +40,10 @@ const data = {
       icon: Bot,
       isActive: true,
       items: [
-        {
-          title: "Add project",
-          url: "/dashboard/project",
-        },
+        // {
+        //   title: "Add project",
+        //   url: "/dashboard/project",
+        // },
         {
           title: "Projects",
           url: "/dashboard/project/all-projects",
@@ -65,21 +60,21 @@ const data = {
    
     },
    
-    {
-      title: "Contact",
-      url: "/dashboard/contact",
-      icon: Contact2,
+    // {
+    //   title: "Contact",
+    //   url: "/dashboard/contact",
+    //   icon: Contact2,
    
-    },
+    // },
     {
       title: "Skills",
       url: "/dashboard/skills",
       icon: Bot,
       items: [
-        {
-          title: "Add skills",
-          url: "/dashboard/skills",
-        },
+        // {
+        //   title: "Add skills",
+        //   url: "/dashboard/skills",
+        // },
         {
           title: "My Skills",
           url: "/dashboard/skills/all-skills",
@@ -90,7 +85,7 @@ const data = {
     {
       title: "Blogs",
       url: "/dashboard/blog",
-      icon: Bot,
+      icon: Library,
       items: [
         {
           title: "Add blog",

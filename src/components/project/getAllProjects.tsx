@@ -359,12 +359,12 @@ const GetAllProjects = () => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden max-h-[90vh] flex flex-col">
-                  <DialogHeader className="p-6 pb-4 border-b">
+                  {/* <DialogHeader className="p-6 pb-4 border-b">
                     <DialogTitle className="text-2xl font-bold text-gray-900">Create New Project</DialogTitle>
                     <DialogDescription className="text-gray-600">
                       Fill out the details below to add your project to the portfolio.
                     </DialogDescription>
-                  </DialogHeader>
+                  </DialogHeader> */}
                   {/* ProjectForm inside the Dialog, passing onSuccess to close the modal */}
                   <div className="flex-1 overflow-y-auto p-6">
                     <ProjectForm onSuccess={handleFormSuccess} />
@@ -465,12 +465,12 @@ const GetAllProjects = () => {
         {/* Dialog for Update Project */}
         <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
           <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden max-h-[90vh] flex flex-col">
-            <DialogHeader className="p-6 pb-4 border-b">
+            {/* <DialogHeader className="p-6 pb-4 border-b">
               <DialogTitle className="text-2xl font-bold text-gray-900">Update Project</DialogTitle>
               <DialogDescription className="text-gray-600">
                 Edit the details below to update your project in the portfolio.
               </DialogDescription>
-            </DialogHeader>
+            </DialogHeader> */}
             <div className="flex-1 overflow-y-auto p-6">
               {editingProject ? (
                 <UpdateProjectForm project={editingProject} onSuccess={handleFormSuccess} />

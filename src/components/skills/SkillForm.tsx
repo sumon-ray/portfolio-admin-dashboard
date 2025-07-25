@@ -1,166 +1,201 @@
-"use client";
+"use client"
 
-import { addSkill } from "@/services/skillsService";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner"; // Assuming 'sonner' is installed for toasts
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Loader2 } from "lucide-react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+// import type { ISkill } from "@/app/types/skill"
+import { addSkill, updateSkillAction } from "@/services/skillsService" // Use updateSkillAction
+import { ISkill } from "./skill.interface"
 
-type SkillFormValues = {
-  name: string;
-  type: "technical" | "soft";
-  proficiency: "beginner" | "intermediate" | "advanced" | "expert";
-  icon?: string;
-};
+const formSchema = z.object({
+  name: z.string().min(1, "Skill name is required").max(50, "Name must be less than 50 characters"),
+  type: z.enum(["technical", "soft"], {
+    required_error: "Skill type is required",
+  }),
+  proficiency: z.enum(["beginner", "intermediate", "advanced", "expert"], {
+    required_error: "Proficiency is required",
+  }),
+  icon: z.string().optional(), // Lucide icon name
+})
 
-const SkillForm = () => {
-  const route = useRouter();
+type FormInputs = z.infer<typeof formSchema>
+
+const SKILL_TYPES = [
+  { value: "technical", label: "Technical" },
+  { value: "soft", label: "Soft" },
+]
+
+const PROFICIENCY_LEVELS = [
+  { value: "beginner", label: "Beginner" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "advanced", label: "Advanced" },
+  { value: "expert", label: "Expert" },
+]
+
+const SkillForm = ({ onSuccess, initialData }: { onSuccess?: () => void; initialData?: ISkill | null }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const form = useForm<FormInputs>({
+    resolver: zodResolver(formSchema),
+    defaultValues: initialData || {
+      name: "",
+      type: "technical", // Default to technical
+      proficiency: "intermediate", // Default to intermediate
+      icon: "",
+    },
+  })
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
     reset,
-  } = useForm<SkillFormValues>({
-    defaultValues: {
-      proficiency: "intermediate",
-    },
-  });
+    setValue,
+    watch,
+    formState: { errors },
+  } = form
 
-  const [isPending, startTransition] = useTransition();
-
-  const onSubmit = (data: SkillFormValues) => {
-    startTransition(async () => {
-      const result = await addSkill(data);
-      if (result.success) {
-        toast.success("Skill added successfully!");
-        route.push('/dashboard/skills/all-skills');
-        reset();
+  const onSubmit = async (data: FormInputs) => {
+    setIsSubmitting(true)
+    try {
+      if (initialData?._id) {
+        // Update existing skill using the server action
+        const updatedSkillWithId: ISkill = {
+          ...data,
+          _id: initialData._id, // Ensure the ID is included
+        }
+        const result = await updateSkillAction(updatedSkillWithId)
+        if (result.success) {
+          toast.success("Skill updated successfully!")
+        } else {
+          toast.error(`Failed to update skill: ${result.error}`)
+        }
       } else {
-        // Using toast.error for consistent UX instead of alert
-        toast.error(`Failed to add skill: ${result.message || result.error || 'An unknown error occurred.'}`);
+        // Add new skill
+        await addSkill(data)
+        toast.success("Skill added successfully!")
+        reset() // Reset form for new skill
       }
-    });
-  };
+      onSuccess?.() // Call onSuccess prop to close the modal and refresh list
+    } catch (error) {
+      console.error("Error submitting skill:", error)
+      toast.error("Failed to save skill.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
-    // Outer container for vertical and horizontal centering of the form on the page.
-    // `min-h-screen` ensures it takes full viewport height for centering.
-    // `px-4 py-8` adds padding on all sides, useful on smaller screens.
-    <div className="flex container  mx-auto p-8 items-center justify-center min-h-screen  py-8">
-      {/* Form container:
-          `max-w-lg` sets a responsive maximum width (e.g., 32rem or 48rem).
-          `w-full` ensures it takes full width up to `max-w-lg`.
-          `mx-auto` centers the container horizontally if the parent isn't flex.
-          `shadow-lg` for a more pronounced shadow.
-          `text-gray-800` for consistent text color within the form title.
-      */}
-      <div className="  max-w-7xl bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">
-          Add New Skill
-        </h2>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Skill Name Field */}
-          <div>
-            {/* Added `htmlFor` to label for accessibility, and `id` to input */}
-            <label htmlFor="name" className="block font-medium mb-1 text-gray-700">
-              Skill Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              {...register("name", { required: "Skill name is required" })}
-              // Enhanced styling for input fields
-              className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., React"
-            />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-            )}
-          </div>
-
-          {/* Skill Type Field */}
-          <div>
-            {/* Added `htmlFor` to label for accessibility, and `id` to select */}
-            <label htmlFor="type" className="block font-medium mb-1 text-gray-700">
-              Skill Type
-            </label>
-            <select
-              id="type"
-              {...register("type", { required: "Type is required" })}
-              // Enhanced styling for select fields
-              className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-            >
-              <option value="">Select Type</option>
-              <option value="technical">Technical</option>
-              <option value="soft">Soft</option>
-            </select>
-            {errors.type && (
-              <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>
-            )}
-          </div>
-
-          {/* Proficiency Field */}
-          <div>
-            {/* Added `htmlFor` to label for accessibility, and `id` to select */}
-            <label htmlFor="proficiency" className="block font-medium mb-1 text-gray-700">
-              Proficiency
-            </label>
-            <select
-              id="proficiency"
-              {...register("proficiency")}
-              // Enhanced styling for select fields
-              className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-            >
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-              <option value="expert">Expert</option>
-            </select>
-          </div>
-
-          {/* Icon Field */}
-          <div>
-            {/* Added `htmlFor` to label for accessibility, and `id` to input */}
-            <label htmlFor="icon" className="block font-medium mb-1 text-gray-700">
-              Icon (Optional)
-            </label>
-            <input
-              type="text"
-              id="icon"
-              {...register("icon")}
-              placeholder="Ex: 'FaReact', 'SiNextdotjs', 'IoMdSettings'"
-              // Enhanced styling for input fields
-              className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              <a
-                href="https://react-icons.github.io/react-icons/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                Find icon names here (e.g., `IoMdSettings` for `&lt;IoMdSettings /&gt;`)
-              </a>
-            </p>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isPending}
-            className={`w-full py-2 rounded-lg text-white font-semibold transition duration-300 ${
-              isPending
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-            }`}
-          >
-            {isPending ? "Submitting..." : "Submit Skill"}
-          </button>
-        </form>
+    <div className="w-full max-w-md bg-white rounded-lg shadow-sm border p-6 mx-auto">
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-2">{initialData ? "Update Skill" : "Add New Skill"}</h1>
+        <p className="text-gray-600 text-sm">
+          {initialData ? "Edit the details below to update your skill" : "Fill in the details below to add a new skill"}
+        </p>
       </div>
-    </div>
-  );
-};
 
-export default SkillForm;
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div>
+          <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+            Skill Name *
+          </Label>
+          <Input id="name" {...register("name")} className="mt-1 h-9" placeholder="e.g., React, Node.js" />
+          <div className="flex justify-between items-center mt-1">
+            {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
+            <p className="text-xs text-gray-500 ml-auto">{watch("name")?.length || 0}/50</p>
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="type" className="text-sm font-medium text-gray-700">
+            Skill Type *
+          </Label>
+          <Select onValueChange={(value) => setValue("type", value as FormInputs["type"])} value={watch("type")}>
+            <SelectTrigger className="mt-1 h-9">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              {SKILL_TYPES.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type.message}</p>}
+        </div>
+
+        <div>
+          <Label htmlFor="proficiency" className="text-sm font-medium text-gray-700">
+            Proficiency *
+          </Label>
+          <Select
+            onValueChange={(value) => setValue("proficiency", value as FormInputs["proficiency"])}
+            value={watch("proficiency")}
+          >
+            <SelectTrigger className="mt-1 h-9">
+              <SelectValue placeholder="Select proficiency" />
+            </SelectTrigger>
+            <SelectContent>
+              {PROFICIENCY_LEVELS.map((level) => (
+                <SelectItem key={level.value} value={level.value}>
+                  {level.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.proficiency && <p className="text-red-500 text-xs mt-1">{errors.proficiency.message}</p>}
+        </div>
+
+        <div>
+          <Label htmlFor="icon" className="text-sm font-medium text-gray-700">
+            Lucide Icon Name (Optional)
+          </Label>
+          <Input id="icon" {...register("icon")} className="mt-1 h-9" placeholder="e.g., Atom, Server, Type" />
+          <p className="text-xs text-gray-500 mt-1">
+            Find icon names at{" "}
+            <a href="https://lucide.dev/icons/" target="_blank" rel="noopener noreferrer" className="underline">
+              lucide.dev/icons
+            </a>
+          </p>
+        </div>
+
+        <div className="pt-2 flex justify-end gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onSuccess?.()} // Call onSuccess to close modal
+            disabled={isSubmitting}
+            className="h-10 px-4"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {initialData ? "Saving Changes..." : "Adding Skill..."}
+              </>
+            ) : initialData ? (
+              "Update Skill"
+            ) : (
+              "Add Skill"
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+export default SkillForm

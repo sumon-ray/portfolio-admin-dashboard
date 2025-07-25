@@ -9,3 +9,4 @@ const AllProjectPage = () => {
 };
 
 export default AllProjectPage;
+
