@@ -8,7 +8,7 @@ const AllSkillPage = async () => {
 
   return (
     <div>
-      <AllSkillLists mySkills={mySkills} />
+      <AllSkillLists />
     </div>
   );
 };

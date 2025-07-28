@@ -21,15 +21,15 @@ const formSchema = z.object({
   title: z.string().min(1, "Title is required").max(100, "Title must be less than 100 characters"),
   description: z
     .string()
-    .min(10, "Description must be at least 10 characters")
-    .max(500, "Description must be less than 500 characters"),
+    .min(10, "Description must be at least 10 characters"),
+   
   technologies: z.array(z.string()).min(1, "At least one technology is required"),
   liveLink: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   githubLink: z.string().url("Please enter a valid GitHub URL").optional().or(z.literal("")),
   isFeatured: z.boolean(),
   image: z.string().url("Please enter a valid image URL").optional().or(z.literal("")),
-  category: z.string().min(1, "Please select a category"),
-  status: z.string().min(1, "Please select a status"),
+  // category: z.string().min(1, "Please select a category"),
+  // status: z.string().min(1, "Please select a status"),
 })
 
 type FormInputs = z.infer<typeof formSchema>
@@ -81,8 +81,8 @@ const UpdateProjectForm = ({ project, onSuccess }: { project: IProject | null; o
       githubLink: "",
       isFeatured: false,
       image: "",
-      category: "",
-      status: "",
+      // category: "",
+      // status: "",
     },
   })
 
@@ -145,8 +145,8 @@ const UpdateProjectForm = ({ project, onSuccess }: { project: IProject | null; o
       githubLink: data.githubLink || "",
       isFeatured: data.isFeatured,
       image: data.image || "",
-      category: data.category,
-      status: data.status,
+      // category: data.category,
+      // status: data.status,
     }
 
     try {
@@ -180,7 +180,7 @@ const UpdateProjectForm = ({ project, onSuccess }: { project: IProject | null; o
             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
           </div>
 
-          <div>
+          {/* <div>
             <Label htmlFor="category" className="text-sm font-medium text-gray-700">
               Category *
             </Label>
@@ -197,9 +197,9 @@ const UpdateProjectForm = ({ project, onSuccess }: { project: IProject | null; o
               </SelectContent>
             </Select>
             {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category.message}</p>}
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <Label htmlFor="status" className="text-sm font-medium text-gray-700">
               Status *
             </Label>
@@ -216,7 +216,7 @@ const UpdateProjectForm = ({ project, onSuccess }: { project: IProject | null; o
               </SelectContent>
             </Select>
             {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status.message}</p>}
-          </div>
+          </div> */}
         </div>
 
         {/* Description */}
